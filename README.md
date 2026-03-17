@@ -1,7 +1,7 @@
 # GestureSpaceInvaders 👾🤚
 
 A Space Invaders for Meta Quest controlled entirely through XR microgestures.
-<img width="655" height="722" alt="image" src="https://github.com/user-attachments/assets/b61e9709-e661-4198-9051-807b171d5edb" />
+<img width="327.5" height="361" alt="image" src="https://github.com/user-attachments/assets/b61e9709-e661-4198-9051-807b171d5edb" />
 
 ## 🎯 Overview
 
