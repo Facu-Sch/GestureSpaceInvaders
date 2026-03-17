@@ -47,6 +47,9 @@ public class EnemyGrid : MonoBehaviour
     [Range(0.05f, 1f)]
     public float stepDownPercent    = 0.25f;
     public float maxSpeedMultiplier = 4f;
+    [Tooltip("Pasos laterales máximos antes de bajar (con todos los enemigos vivos). " +
+             "Se reduce a 0 linealmente cuando queda la mitad o menos.")]
+    public int maxLateralStepsBeforeDescent = 4;
 
     private static readonly int[] TypeHP     = { 0, 1, 1, 2, 3 };
     private static readonly int[] TypePoints = { 0, 1, 2, 3, 4 };
@@ -77,11 +80,11 @@ public class EnemyGrid : MonoBehaviour
     private float _tickInterval;
     private float _cellSize;
     private float _xBound;
-    private float _gameOverY;
     private float _canvasTopW;
     private float _canvasBottomW;
     private int   _total;
     private int   _alive;
+    private int   _lateralStepsTaken; // pasos laterales dados desde la última bajada
 
     // ── Inicialización ─────────────────────────────────────────────────────────
 
@@ -106,7 +109,6 @@ public class EnemyGrid : MonoBehaviour
         float usableW  = canvasW - marginSide * 2f;
         _cellSize      = usableW / columns;
         _xBound        = usableW * 0.5f - _cellSize * 0.5f;
-        _gameOverY     = _canvasBottomW;
 
         if (player != null)
         {
@@ -230,7 +232,14 @@ public class EnemyGrid : MonoBehaviour
         float halfCell = _cellSize * 0.5f;
         float stepDown = _cellSize * stepDownPercent;
 
+        // Calcula cuántos pasos laterales dar antes de bajar.
+        // Mapea linealmente el rango [_total * 0.5, _total] → [0, maxLateralStepsBeforeDescent].
+        // Cuando quedan la mitad o menos de enemigos, el valor es 0 y bajan en cada tick.
+        float t = Mathf.Clamp01((_alive - _total * 0.5f) / (_total * 0.5f));
+        int stepsBeforeDescent = Mathf.RoundToInt(maxLateralStepsBeforeDescent * t);
+
         // ── 1. Movimiento horizontal por fila ─────────────────────────
+        AudioManager.Instance?.PlayEnemyMoveLateral();
         foreach (var row in _rows)
         {
             if (row.enemies.Count == 0) continue;
@@ -258,13 +267,21 @@ public class EnemyGrid : MonoBehaviour
             row.root.localPosition = pos;
         }
 
-        // ── 2. Todas las filas bajan juntas ───────────────────────────
-        foreach (var row in _rows)
+        _lateralStepsTaken++;
+
+        // ── 2. Bajar solo si se completaron los pasos laterales requeridos ────
+        if (_lateralStepsTaken > stepsBeforeDescent)
         {
-            row.root.position = new Vector3(
-                row.root.position.x,
-                row.root.position.y - stepDown,
-                row.root.position.z);
+            _lateralStepsTaken = 0;
+
+            AudioManager.Instance?.PlayEnemyMoveVertical();
+            foreach (var row in _rows)
+            {
+                row.root.position = new Vector3(
+                    row.root.position.x,
+                    row.root.position.y - stepDown,
+                    row.root.position.z);
+            }
         }
 
         // ── 3. Chequeo de game over ───────────────────────────────────

@@ -127,6 +127,7 @@ public class Player : MonoBehaviour
         if (_activeBullets.Count >= maxBullets) return;
 
         _fireCooldown = fireRate;
+        AudioManager.Instance?.PlayShoot();
 
         // Leer el borde superior del canvas dinámicamente
         float canvasH = canvasRect.rect.height;

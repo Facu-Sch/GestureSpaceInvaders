@@ -14,9 +14,12 @@ public class GameManager : MonoBehaviour
     [Header("UI")]
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI statusText;
+    [Tooltip("Texto que se muestra antes de que empiece la partida")]
+    public TextMeshProUGUI startPromptText;
 
     private int  _score;
-    private bool _gameActive = true;
+    private bool _gameActive  = false;
+    private bool _gameStarted = false;
 
     private void Awake()
     {
@@ -32,16 +35,42 @@ public class GameManager : MonoBehaviour
     {
         RefreshScore();
         statusText.gameObject.SetActive(false);
+
+        // Mostrar cartel — el juego spawneará normalmente pero Update
+        // estará congelado porque IsGameActive() devuelve false
+        if (startPromptText != null)
+            startPromptText.gameObject.SetActive(true);
     }
 
     private void Update()
     {
-        // Reinicio por teclado — solo disponible cuando la partida terminó
-        if (!_gameActive && Keyboard.current[Key.R].wasPressedThisFrame)
+        // Iniciar con teclado (PC)
+        if (!_gameStarted && Keyboard.current[Key.Enter].wasPressedThisFrame)
+            StartGame();
+
+        // Reiniciar — solo cuando la partida terminó
+        if (_gameStarted && !_gameActive && Keyboard.current[Key.R].wasPressedThisFrame)
             RestartGame();
     }
 
-    public bool IsGameActive() => _gameActive;
+    public bool IsGameActive()  => _gameActive;
+    public bool IsGameStarted() => _gameStarted;
+
+    /// <summary>
+    /// Inicia la partida. Llamado por SwipeUp mano izquierda o Enter en PC.
+    /// EnemyGrid y Player ya están spawneados — solo se desbloquea el loop.
+    /// </summary>
+    public void StartGame()
+    {
+        if (_gameStarted) return;
+        _gameStarted = true;
+        _gameActive  = true;
+
+        if (startPromptText != null)
+            startPromptText.gameObject.SetActive(false);
+
+        AudioManager.Instance?.PlayMusic();
+    }
 
     public void AddScore(int pts)
     {
@@ -49,26 +78,26 @@ public class GameManager : MonoBehaviour
         RefreshScore();
     }
 
-    public void OnGridCleared()          => EndGame("YOU  WIN!");
-    public void OnEnemiesReachedBottom() => EndGame("GAME  OVER");
+    public void OnGridCleared()          => EndGame("YOU  WIN!",  isWin: true);
+    public void OnEnemiesReachedBottom() => EndGame("GAME  OVER", isWin: false);
+    public void OnPlayerHit()            => EndGame("GAME  OVER", isWin: false);
 
-    /// <summary>
-    /// Recarga la escena activa. Al volver a ejecutar Start en todos los
-    /// componentes, el canvas se reposiciona frente al jugador automáticamente.
-    /// Llamado desde XRGameController (SwipeDown mano izquierda) o teclado R.
-    /// </summary>
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    private void EndGame(string msg)
+    private void EndGame(string msg, bool isWin)
     {
+        if (!_gameActive) return;
+
         _gameActive = false;
+
+        if (isWin) AudioManager.Instance?.PlayWin();
+        else       AudioManager.Instance?.PlayGameOver();
+
         statusText.gameObject.SetActive(true);
         statusText.text = msg;
-        if (player)    player.enabled    = false;
-        if (enemyGrid) enemyGrid.enabled = false;
     }
 
     private void RefreshScore()

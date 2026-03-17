@@ -83,7 +83,7 @@ public class XRGameController : MonoBehaviour
 
     private void Update()
     {
-        if (!GameManager.Instance.IsGameActive()) return;
+        // El canvas se puede mover siempre (antes y durante la partida)
         if (!_canvasLocked) FollowLeftHand();
     }
 
@@ -205,6 +205,9 @@ public class XRGameController : MonoBehaviour
             case OVRHand.MicrogestureType.SwipeRight:
                 player?.SetXRMovement(1f);
                 break;
+            case OVRHand.MicrogestureType.SwipeBackward:
+                player?.SetXRMovement(0f);
+                break;
             case OVRHand.MicrogestureType.ThumbTap:
                 player?.XRShoot();
                 break;
@@ -217,6 +220,10 @@ public class XRGameController : MonoBehaviour
     {
         switch (gesture)
         {
+            case OVRHand.MicrogestureType.SwipeForward:
+                GameManager.Instance.StartGame();
+                break;
+
             case OVRHand.MicrogestureType.ThumbTap:
                 _canvasLocked = !_canvasLocked;
                 if (!_canvasLocked)
@@ -224,7 +231,9 @@ public class XRGameController : MonoBehaviour
                 break;
 
             case OVRHand.MicrogestureType.SwipeBackward:
-                GameManager.Instance.RestartGame();
+                // Solo disponible cuando la partida terminó
+                if (!GameManager.Instance.IsGameActive())
+                    GameManager.Instance.RestartGame();
                 break;
         }
     }

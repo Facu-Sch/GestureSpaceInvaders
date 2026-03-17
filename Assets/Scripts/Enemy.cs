@@ -19,6 +19,7 @@ public class Enemy : MonoBehaviour
         _health -= amount;
         if (_health <= 0)
         {
+            AudioManager.Instance?.PlayEnemyDestroyed();
             OnDied?.Invoke(this);
             Destroy(gameObject);
         }
@@ -26,13 +27,16 @@ public class Enemy : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Usa SelfDestroy para que Bullet notifique al contador de Player
-        // antes de destruirse, sin importar cómo llegó al impacto.
-        var bullet = other.GetComponent<Bullet>();
-        if (bullet != null)
+        if (other.CompareTag("PlayerBullet"))
         {
-            bullet.SelfDestroy();
+            var bullet = other.GetComponent<Bullet>();
+            if (bullet != null) bullet.SelfDestroy();
             TakeDamage(1);
+            return;
         }
+
+        // Si un enemigo toca la nave del jugador, game over inmediato
+        if (other.CompareTag("Player"))
+            GameManager.Instance.OnPlayerHit();
     }
 }
