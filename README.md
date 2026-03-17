@@ -7,14 +7,14 @@ A Space Invaders for Meta Quest controlled entirely through XR microgestures.
 
 ## 🎯 Overview
 
-Built in the downtime between two larger projects to keep microgesture skills fresh and test one specific thing: tying the game canvas to the left hand throughout a full session. The canvas stays on a sphere around the player's eye so it always faces you, and its movement scales with depth — the farther the panel, the more it moves per unit of hand displacement, so it always ends up where your hand suggests it should be.
+Built in the downtime between two larger projects to keep microgesture skills fresh and test one specific thing: tying the game canvas to the left hand throughout a full session. The canvas stays on a sphere around the player's eye so it always faces you, and its movement scales with depth, the farther the panel, the more it moves per unit of hand displacement, so it always ends up where your hand suggests it should be.
 
 Everything else is straightforward Space Invaders.
 
 ## ✨ Features
 
 - **Floating world space canvas:** The entire game lives on a repositionable 2D panel in your XR environment
-- **Hand-tethered tracking:** Toggle the canvas to follow your left hand — movement scales with depth so it always feels proportional regardless of how far the panel is
+- **Hand-tethered tracking:** Toggle the canvas to follow your left hand movement scales with depth so it always feels proportional regardless of how far the panel is
 - **Dual-hand microgesture controls:** Left hand manages the game world, right hand controls the ship
 - **Dynamic difficulty:** Enemies speed up as their numbers drop
 - **Keyboard fallback:** Full PC/editor support for testing without the headset
@@ -105,7 +105,7 @@ Assets/
 
 ## 🎓 Development Context
 
-Made at GTI (FIUNER) while waiting on feedback from other projects. Two things to verify: that Meta XR microgestures were still fresh, and whether continuous hand-tethered canvas tracking was viable for a full game session without feeling broken. It worked out — the depth-proportional movement ended up being the key piece to make it feel consistent.
+Made at GTI (FIUNER) while waiting on feedback from other projects. Two things to verify: that Meta XR microgestures were still fresh, and whether continuous hand-tethered canvas tracking was viable for a full game session without feeling broken. It worked out, the depth-proportional movement ended up being the key piece to make it feel consistent.
 
 ## 🗺️ Roadmap
 
